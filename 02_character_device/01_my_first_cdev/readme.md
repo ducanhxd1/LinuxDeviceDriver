@@ -1,78 +1,84 @@
-# Understanding Linux Device Files
+# Tìm hiểu về Device Files trong Linux
 
-## Block and Character Devices
+## Thiết bị Block và Character
 
-## Major & Minor 
+## Major & Minor Number
 
-### Where do device files live and why are they “virtual”?
+### Device file nằm ở đâu và tại sao chúng là file "ảo"?
 
-* The `/dev` directory contains special files called device nodes.
+* Thư mục `/dev` chứa các file đặc biệt gọi là **device node**.
 ```
 ls /dev
 ls /dev | wc -l
 ```
 
-
-* b = block, c = character
+* `b` = block device, `c` = character device
 ```
 ls -lh /dev/mmcblk0 /dev/tty0 /dev/gpiochip0
 ```
 
-* minor number
+* Xem minor number của các thiết bị
 ```
 ls -lh /dev/tty{1,2,3,4,5}
 ```
 
-* get registerd major numbers
+* Xem danh sách các major number đã được đăng ký với kernel
 ```
 cat /proc/devices
 ```
 
-### filename doesn’t matter
+### Tên file không quan trọng
 
-**Character Device: Serial Port example**
-* Enable Serial port
+**Character Device: Ví dụ với cổng Serial**
+
+* Bật cổng Serial
 ```
 sudo raspi-config
 ```
-* install screen
+
+* Cài đặt `screen`
 ```
 sudo apt install screen -y
 ```
 
-* screen serial port (short the UART TX and RX pins)
+* Mở cổng serial bằng `screen` (nối tắt chân UART TX và RX để test)
 ```
 sudo screen /dev/ttyS0 9600
 ```
-*Whatever we type anyting it will echo back, showing that the serial interface works.*   
-<small>exit form screen: `Ctrl + A` , Then, `press D`.</small>
+*Khi gõ bất kỳ ký tự nào, nó sẽ được echo lại — chứng tỏ giao tiếp serial đang hoạt động.*  
+<small>Thoát khỏi screen: nhấn `Ctrl + A`, sau đó nhấn `D`.</small>
 
-* Create `my_serial` device node
+* Tạo device node mới tên `my_serial`
 ```
 sudo mknod my_serial c 4 64
 ```
-* again screen serail bus using new node `my_serial`:
+
+* Mở lại cổng serial bằng node mới `my_serial`
 ```
 sudo screen my_serial 9600
 ```
-<small>This works exact same. like `ttyS0`</small>
+<small>Hoạt động y hệt như khi dùng `ttyS0`.</small>
 
-**The filename doesn’t matter – only major+minor do.**
+**Tên file không quan trọng — chỉ có Major + Minor number mới quyết định thiết bị nào được dùng.**
 
-**Block Device: SD Card Memeory block example**
-* dump the `mmcblk0` 4kb memory,
+---
+
+**Block Device: Ví dụ với thẻ nhớ SD Card**
+
+* Dump 512 bytes đầu tiên của `mmcblk0`
 ```
 sudo hexdump -C /dev/mmcblk0 -n 512 | head
 ```
 
-* create our own device node:
+* Tạo device node của riêng mình
 ```shell
-sudo mknod my_mblk b 179 0 # 179,0 is the same major and minor number of the mmcblk0
+sudo mknod my_mblk b 179 0 # 179, 0 là Major và Minor number giống với mmcblk0
 ```
 ```
 ls -lh my_mblk
 ```
-* Read 1st 4kb of data of new device node `my_mblk`
+
+* Đọc 512 bytes đầu tiên từ device node mới `my_mblk`
 ```
 sudo hexdump -C my_mblk -n 512 | head
 ```
