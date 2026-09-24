@@ -1,9 +1,9 @@
 .PHONY: all run clean
 
 all:
-	gcc -std=c11 -Wall -Wextra -Wpedantic -g oled.c -o oled
+	gcc -std=c11 -Wall -Wextra -Wpedantic -g oled_v2.c -o oled
 
 run:
-	./oled
+	./oled_v2
 clean:
-	rm -rf oled
+	rm -rf oled_v2
